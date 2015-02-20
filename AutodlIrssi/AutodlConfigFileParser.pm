@@ -34,6 +34,7 @@ package AutodlIrssi::AutodlConfigFileParser;
 use AutodlIrssi::Constants;
 use AutodlIrssi::TextUtils;
 use base qw/ AutodlIrssi::ConfigFileParser /;
+use Storable 'dclone';
 
 sub defaultOptions {
 	return {
@@ -239,6 +240,7 @@ sub doHeaderFilter {
 		my $filter = {
 			name => '',
 			enabled => 1,
+			explode => 0,
 			matchReleases => '',
 			exceptReleases => '',
 			matchCategories => '',
@@ -293,6 +295,7 @@ sub doHeaderFilter {
 		my $options = $header->{options};
 		$self->setOptions('FILTER', $filter, $options, {
 			'enabled' => 'enabled',
+			'explode' => 'explode',
 			'match-releases' => 'matchReleases',
 			'except-releases' => 'exceptReleases',
 			'match-categories' => 'matchCategories',
@@ -343,12 +346,14 @@ sub doHeaderFilter {
 			'wol-ip-address' => 'wolIpAddress',
 			'wol-port' => 'wolPort',
 		});
+
 		$filter->{name} = $header->{name};
 
 		if ($filter->{uploadType} ne '') {
 			$self->checkValidUploadType($filter->{uploadType}, $options->{'upload-type'});
 		}
 		$filter->{enabled} = convertStringToBoolean($filter->{enabled});
+		$filter->{explode} = convertStringToBoolean($filter->{explode});
 		$filter->{scene} = convertStringToBoolean($filter->{scene}) if $filter->{scene};
 		$filter->{log} = convertStringToBoolean($filter->{log}) if $filter->{log};
 		$filter->{cue} = convertStringToBoolean($filter->{cue}) if $filter->{cue};
@@ -359,7 +364,25 @@ sub doHeaderFilter {
 		$filter->{tagsAny} = convertStringToBoolean($filter->{tagsAny});
 		$filter->{exceptTagsAny} = convertStringToBoolean($filter->{exceptTagsAny});
 
-		push @{$self->{filters}}, $filter;
+		if ($filter->{explode} && $filter->{matchReleases}) {
+			# explode into many filters
+			my $counter = 0;
+			my @matchReleasesAry = split /,/, $filter->{matchReleases};
+			foreach (@matchReleasesAry) {
+				my $matchReleasesSingle = $_;
+				$matchReleasesSingle = trim $matchReleasesSingle;
+				if ($matchReleasesSingle) {
+					my $clonedFilter = dclone($filter);
+					$clonedFilter->{name} = "explode_${counter}_" . $filter->{name}; 
+					$clonedFilter->{matchReleases} = $matchReleasesSingle;
+					push @{$self->{filters}}, $clonedFilter;
+					$counter++;
+				}
+			}
+		} else {
+			# push the single filter
+			push @{$self->{filters}}, $filter;
+		}
 	}
 }
 
