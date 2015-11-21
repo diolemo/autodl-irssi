@@ -54,7 +54,7 @@ package AutodlIrssi::Globals;
 use AutodlIrssi::Irssi;
 use AutodlIrssi::TextUtils;
 use base qw/ Exporter /;
-our @EXPORT = qw/ message dmessage currentTime formatException /;
+our @EXPORT = qw/ getLevel message dmessage currentTime formatException /;
 our @EXPORT_OK = qw//;
 
 sub currentTime {

@@ -31,7 +31,7 @@ use strict;
 use warnings;
 
 package AutodlIrssi::Dirs;
-use AutodlIrssi::Globals qw/ message /;
+use AutodlIrssi::Globals qw/ message getLevel /;
 use Irssi;
 use File::Spec;
 use base qw/ Exporter /;
@@ -41,6 +41,7 @@ our @EXPORT = qw/ getHomeDir getIrssiScriptDir getAutodlFilesDir getTrackerFiles
 our @EXPORT_OK = qw//;
 
 my $_homeDir = "";
+my $_hasOutputConfigDir = 0;
 
 # Returns user's home directory
 sub getHomeDir {
@@ -65,9 +66,25 @@ sub getTrackerFilesDir {
 	return File::Spec->catfile(getAutodlFilesDir(), "trackers");
 }
 
+sub printSettingsDir {
+	my ($dir) = @_;
+	if (!$_hasOutputConfigDir) {
+		$_hasOutputConfigDir = 1;
+		message getLevel(), $dir;
+	}
+}
+
 # Returns directory of our settings dir
 sub getAutodlSettingsDir {
-	return File::Spec->catfile(getHomeDir(), ".autodl");
+	my $configDir = $ENV{'AUTODL_SETTINGS_DIR'};
+	if (defined $configDir && -d $configDir) {
+		printSettingsDir($configDir);
+		return $configDir;
+	} else {
+		# revert to default behaviour using hard-coded folder
+		printSettingsDir(File::Spec->catfile(getHomeDir(), ".autodl"));
+		return File::Spec->catfile(getHomeDir(), ".autodl");
+	}
 }
 
 # Returns pathname of our autodl.cfg file
