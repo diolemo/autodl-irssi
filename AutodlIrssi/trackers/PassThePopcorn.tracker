@@ -40,7 +40,7 @@
 		<server
 			network="PassThePopcorn"
 			serverNames="irc.passthepopcorn.me"
-			channelNames="#ptp-announce,#ptp-announce-ssl"
+			channelNames="#ptp-announce"
 			announcerNames="Hummingbird"
 			/>
 	</servers>
@@ -50,7 +50,7 @@
 			<extract>
 				<!--Irene Huss - Nattrond AKA The Night Round [2008] by Anders Engström - XviD / DVD / AVI / 640x352 - http://passthepopcorn.me/torrents.php?id=51627 / http://passthepopcorn.me/torrents.php?action=download&id=97333 - crime, drama, mystery-->
 				<!--Dirty Rotten Scoundrels [1988] by Frank Oz - x264 / Blu-ray / MKV / 720p - http://passthepopcorn.me/torrents.php?id=10735 / http://passthepopcorn.me/torrents.php?action=download&id=97367 - comedy, crime-->
-				<regex value="^(.*)-\s+(https?\:\/\/[^\/]+\/).*action=download&amp;id=(\d+)\s+-\s+(.*)"/>
+				<regex value="^(.*)-\s*https?:.*[&amp;\?]id=.*https?\:\/\/([^\/]+\/).*[&amp;\?]id=(\d+)\s*-\s*(.*)"/>
 				<vars>
 					<var name="torrentName"/>
 					<var name="$baseUrl"/>
@@ -72,10 +72,12 @@
 				</vars>
 			</extract>
 
-			<varreplace name="$releaseTags" srcvar="$releaseTags" regex="[/]" replace=","/>
-
-			<!--Some use dots some use underscores, but replace all with spaces-->
-			<varreplace name="tags" srcvar="tags" regex="[._]" replace=" "/>
+			<extract srcvar="torrentName" optional="true">
+				<regex value="(\S+ /.*)"/>
+				<vars>
+					<var name="$releaseTags"/>
+				</vars>
+			</extract>
 
 			<extract srcvar="torrentName" optional="true">
 				<regex value="(?:^|[^\d])((?:19|20)\d\d)(?:$|[^\d])"/>
@@ -91,18 +93,25 @@
 				</vars>
 			</extract>
 
+			<varreplace name="$releaseTags" srcvar="$releaseTags" regex="[/]" replace=","/>
+
+			<!--Some use dots some use underscores, but replace all with spaces-->
+			<varreplace name="tags" srcvar="tags" regex="[._]" replace=" "/>
+
 			<extracttags srcvar="$releaseTags" split=",">
 				<setvarif varName="scene" value="Scene" newValue="true"/>
-
-				<setvarif varName="resolution" regex="^(?:SD|Standard?Def.*|480i|480p|576p|720p|810p|1080p|1080i|PD|Portable Device)$"/>
-				<setvarif varName="source" regex="^(?:R5|DVDScr|BRRip|CAM|TS|TELESYNC|TC|TELECINE|DSR|PDTV|HDTV|DVDRip|BDRip|DVDR|DVD|BluRay|Blu\-Ray|WEB\-DL|WEB|TVRip|HDDVD|HD\-DVD)$"/>
+				<setvarif varName="freeleech" value="Freeleech!" newValue="true"/>
+				<setvarif varName="resolution" regex="^(?:SD|Standard?Def.*|480i|480p|576p|720p|810p|1080p|1080i|2160p|PD|Portable Device)$"/>
+				<setvarif varName="source" regex="^(?:R5|DVDScr|BRRip|CAM|TS|TELESYNC|TC|TELECINE|DSR|PDTV|HDTV|DVDRip|BDRip|DVDR|DVD|BluRay|Blu\-Ray|WEBRip|WEB\-DL|WEB|TVRip|HDDVD|HD\-DVD)$"/>
 				<setvarif varName="encoder" regex="^(?:XviD|DivX|x264|h\.264|h264|mpeg2|VC\-1|VC1|WMV)$"/>
+				<setvarif varName="container" regex="^(?:AVI|MKV|VOB|MPEG|MP4|ISO|WMV|TS|M4V|M2TS)$"/>
 
 				<!--Ignored-->
 				<regex value=""/>
 			</extracttags>
 
 			<var name="torrentUrl">
+				<string value="https://"/>
 				<var name="$baseUrl"/>
 				<string value="torrents.php?action=download&amp;id="/>
 				<var name="$torrentId"/>

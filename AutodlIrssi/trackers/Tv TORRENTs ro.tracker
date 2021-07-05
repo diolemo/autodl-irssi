@@ -40,7 +40,7 @@
 		<server
 			network="TvT"
 			serverNames="irc.freshon.tv"
-			channelNames="#tvt"
+			channelNames="#tvt.announce"
 			announcerNames="T"
 			/>
 	</servers>
@@ -53,7 +53,7 @@
 				<vars>
 					<var name="category"/>
 					<var name="torrentName"/>
-					<var name="torrentSize"/>
+					<var name="$torrentSize"/>
 					<var name="$baseUrl"/>
 					<var name="$torrentId"/>
 				</vars>
