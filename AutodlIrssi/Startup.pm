@@ -51,6 +51,7 @@ use AutodlIrssi::AutoConnector;
 use AutodlIrssi::MessageBuffer;
 use AutodlIrssi::EventManager;
 use Net::SSLeay qw//;
+use AutodlIrssi::HttpRequest;
 
 #
 # How often we'll check which IRC announcers haven't announced anything for a long time. Default is
@@ -73,6 +74,7 @@ my $trackersVersion = -1;
 
 # Called when we're enabled
 sub enable {
+
 	$AutodlIrssi::g->{messageBuffer} = new AutodlIrssi::MessageBuffer();
 
 	message 3, "\x02autodl-irssi\x02 \x02v$version\x02 is now enabled! :-)";
@@ -111,6 +113,7 @@ sub enable {
 	irssi_command_bind('autodl', \&command_autodl);
 
 	irssi_timeout_add(1000, \&secondTimer, undef);
+
 }
 
 # Called when we're disabled
